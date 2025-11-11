@@ -1,0 +1,97 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css");
+
+.whychooseus-section {
+  background: #f9fbff;
+  padding: 100px 0;
+  font-family: "Poppins", sans-serif;
+}
+
+.whychooseus-container {
+  width: 85%;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.whychooseus-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+.whychooseus-title span {
+  color: #4a88d4;
+}
+
+.whychooseus-subtitle {
+  font-size: 1.1rem;
+  color: #555;
+  max-width: 750px;
+  margin: 0 auto 3rem auto;
+  line-height: 1.6;
+}
+
+.whychooseus-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.why-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.07);
+  padding: 2.5rem 2rem;
+  transition: all 0.4s ease;
+  text-align: center;
+}
+
+.why-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
+}
+
+.icon-circle {
+  background: #4a88d4;
+  color: #fff;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 1.2rem auto;
+  font-size: 1.8rem;
+  transition: background 0.3s ease;
+}
+
+.why-card:hover .icon-circle {
+  background: #1a6eff;
+}
+
+.why-card h3 {
+  font-size: 1.2rem;
+  color: #222;
+  margin-bottom: 0.7rem;
+}
+
+.why-card p {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .whychooseus-title {
+    font-size: 2rem;
+  }
+
+  .whychooseus-subtitle {
+    font-size: 1rem;
+  }
+
+  .why-card {
+    padding: 2rem 1.5rem;
+  }
+}

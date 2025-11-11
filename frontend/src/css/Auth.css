@@ -1,0 +1,312 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css");
+
+.auth-container {
+  display: flex;
+  height: 90vh;
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+  padding-top: 70px;
+  overflow-y: clip;
+}
+
+/* COMMON HEADINGS */
+.signup-box h1,
+.login-box h1 {
+  color: #000;
+  margin: 0;
+}
+
+/* LEFT SIDE */
+.auth-left {
+  flex: 1;
+  background: url("../assets/bg-image.jpg") no-repeat center center/cover;
+  max-width: 700px;
+}
+
+.auth-left img {
+  width: 100%;
+  height: 100%;
+  border-radius: 0 40px 40px 0;
+}
+
+.auth-left-buttons button {
+  background: transparent;
+  border: 1.5px solid #fff;
+  border-radius: 50px;
+  padding: 0.5rem 1.3rem;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+}
+
+.auth-left-buttons .fill-btn {
+  background: #fff;
+  color: #000;
+}
+
+.auth-left-buttons button:hover {
+  transform: scale(1.05);
+}
+
+.auth-left-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+}
+
+.profile img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.arrow-buttons button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.arrow-buttons button:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* RIGHT SIDE */
+.auth-right {
+  flex: 1;
+  background: #fff;
+  border-radius: 40px 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.lang-select {
+  position: absolute;
+  top: 30px;
+  right: 50px;
+  font-weight: 500;
+  color: #555;
+}
+
+/* SIGNUP & LOGIN BOX STYLES */
+.signup-box,
+.login-box {
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.signup-box h1,
+.login-box h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.signup-box p,
+.login-box p {
+  color: #777;
+  margin-bottom: 1.5rem;
+}
+
+/* FORM INPUTS */
+form input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  outline: none;
+  background-color: #fefefe;
+  color: #000;
+}
+
+form input:focus {
+  border-color: #23a2dc;
+}
+
+.forgot {
+  text-align: right;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.forgot a {
+  color: #ff4b2b;
+  text-decoration: none;
+}
+
+/* DIVIDER */
+.divider {
+  margin: 1rem 0;
+  color: #aaa;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  background: #ddd;
+  width: 40%;
+  position: absolute;
+  top: 50%;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+/* GOOGLE BUTTON */
+.google-btn {
+  width: 100%;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #000;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.google-btn:hover {
+  background: #f7f7f7;
+}
+
+.google-btn img {
+  width: 20px;
+}
+
+/* SIGNUP BUTTON */
+.signup-btn {
+  width: 100%;
+  background: #4a88d4;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signup-btn:hover {
+  background: #1a6eff;
+}
+
+/* LOGIN BUTTON */
+.login-btn {
+  width: 100%;
+  background: #4a88d4;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: #1a6eff;
+}
+
+/* TEXT BELOW FORM */
+.signup-text,
+.login-text {
+  color: #777;
+  margin: 0px;
+}
+
+.signup-text a,
+.login-text a {
+  color: #ff4b2b;
+  text-decoration: none;
+}
+
+/* SOCIAL ICONS */
+.social-icons {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  color: #555;
+}
+
+.social-icons i {
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.social-icons i:hover {
+  color: #2be3ff;
+}
+
+/* RESPONSIVE */
+@media (max-width: 950px) {
+  .auth-container {
+    flex-direction: column;
+  }
+
+  .auth-left,
+  .auth-right {
+    border-radius: 0;
+  }
+
+  .auth-left {
+    height: 40vh;
+  }
+}
+
+/* ROLE SELECT DROPDOWN */
+.role-select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #555;
+  background-color: #fff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.role-select:focus {
+  border-color: #4a88d4;
+}
+
+/* HOSPITAL INPUT ALIGNMENT */
+input[type="text"] {
+  text-transform: none;
+}
+

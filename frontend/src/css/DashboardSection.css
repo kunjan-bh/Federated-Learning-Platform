@@ -1,0 +1,130 @@
+.dashboard-section {
+    width: 100%;
+    padding: 4rem 2rem;
+    background: #f9fbff;
+    font-family: 'Poppins', sans-serif;
+    color: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .dashboard-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: flex-start;
+  }
+  
+  /* Left image side */
+  .dashboard-image {
+    flex: 1 1 400px;
+    position: relative;
+  }
+  
+  .dashboard-image img {
+    width: 100%;
+    border-radius: 1rem;
+  }
+  
+  .demo-btn {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    background: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  /* Right text side */
+  .dashboard-content {
+    flex: 1 1 500px;
+  }
+  
+  .dashboard-section h2 {
+    font-size: 2.5rem;
+    line-height: 1.1;
+    max-width: 1200px;
+    margin-bottom: 2rem;
+    text-align: center;
+    margin-bottom: 100px;
+  }
+  
+  .dashboard-content h2 span {
+    font-weight: 700;
+  }
+  
+  .features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .metrics-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+  .metrics-box p{
+    margin: 0;
+  }
+  
+  .feature {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .feature-number {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #111;
+    flex-shrink: 0;
+  }
+  
+  .feature-text h3 {
+    margin: 0 0 0.3rem 0;
+    font-size: 1.2rem;
+  }
+  
+  .feature-text p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #555;
+  }
+  
+  .dashboard-description {
+    margin-bottom: 2rem;
+    margin-top: 0;
+    color: #555;
+    font-size: 0.95rem;
+  }
+  
+  .highlight-box {
+    background-color: #00c853; /* green */
+    color: #fff;
+    padding: 1.5rem 2rem;
+    border-radius: 1rem;
+    max-width: 220px;
+    text-align: center;
+  }
+  
+  .highlight-box span {
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .highlight-box p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  

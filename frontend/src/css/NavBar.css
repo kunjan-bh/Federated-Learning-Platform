@@ -1,0 +1,255 @@
+.nav-container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #000000;
+    height: 70px;
+}
+.nav-links ul{
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 20px;
+}
+.nav-links ul{
+    background: #f9fbff;
+    border-radius: 20px;
+}
+
+
+.navigation-bar{
+
+    position: fixed; 
+    top: 0;           
+    left: 0;
+    width: 100%;
+    height: 70px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    backdrop-filter: blur(3px);
+    z-index: 10000;
+}
+.logo{
+    font-family: "Nova Cut", sans-serif;
+    font-size: 24px;
+    display: flex;
+    gap: 0px;
+    align-items: center;
+    
+}
+.logo-back{
+    background: #f9fbff;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+.logo img{
+    margin: 0;
+    height: 40px;
+}
+.logo span{
+    font-family: "Nova Cut", sans-serif;
+    font-size: 32px;
+    display: block;
+    align-items: flex-end;
+    padding: 0px;
+    
+}
+.nav-links ul li a {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  font-family: 'Poppins', sans-serif;
+  padding: 5px 10px;
+  transition-delay: 0.1s;
+  border-radius: 0px;
+  color: #000000;
+}
+
+.nav-links ul li a::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #050505;
+  transform: translateX(-50%);
+  transition: width 0.4s ease;
+}
+
+.nav-links ul li a:hover::before {
+  width: 100%;
+}
+
+.nav-links ul li a:active {
+    transform: translateY(0);
+}
+.nav-container a{
+    text-decoration: none;
+    color: #000000;
+}
+.menu-box{
+    display: none;
+}
+.headlink a{
+    display: flex;
+    padding: 0%;
+    border-radius: 5px;
+}
+.headlink{
+    display: flex;
+    border-radius: 50px;
+    gap: 10px;
+}
+.headlink a:hover {
+    color: inherit;             /* keep original color */
+    background-color: #000000; /* remove background */
+    border-bottom: none;        /* remove border */
+}
+/* ===== NEWLY ADDED CSS ===== */
+
+/* Modern "Get Started" button */
+.nav-button {
+    display: flex;
+    align-items: center;
+  }
+  
+  .get-started-btn {
+    background: linear-gradient(90deg, #ffffff, #3894e5);
+    color: #ffffff;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(75, 166, 222, 0.25);
+  }
+  
+  .get-started-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(142, 45, 226, 0.35);
+  }
+  .nav-links ul{
+    padding: 0px;
+  }
+  
+  /* Hide button on mobile (since menu appears) */
+  @media (max-width: 768px) {
+    .nav-button {
+      display: none;
+    }
+  }
+  
+@media (max-width: 768px) {
+    .headlink{
+        display: none;
+    }
+    .menu-box{
+        display: block;
+    }
+    .nav-links{
+        display: none;
+    }
+    #showmenu{
+        display: block;
+        width: 45px;
+        height: 35px;
+        /* background: #000000; */
+        border-radius: 20px;
+        background-image: url('/burger.svg');
+        background-repeat: no-repeat;
+        background-size: 45px 35px;
+        background-position: center;
+    } 
+    .menu {
+        display: none; 
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 0 10px;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+    .menu-content {
+        width: 100%;
+        height: 250px;
+        text-align: center;
+        position: relative;
+        z-index: 20;
+        font-family: "Nunito Sans", sans-serif;
+        transition: left 300ms ease-in;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        animation: slideInRight;
+        animation-duration: 0.5s;
+        background-color: rgba(255, 255, 255, 0.7); 
+
+
+        
+    }
+    .menu .div{
+        width: 100%;
+    }
+    
+    .menu-content .menu-logo{
+        gap: 10px;
+        display: block;
+    }
+    .menu-content .menu-logo img{
+        width: 30px;
+    }
+    .menu-logo .name-title{
+        position: relative;
+        bottom: 10px;
+    }
+    .menu-background {
+        position: fixed;
+        background-image: url('/close.svg');
+        color: #ffffff;
+        background-repeat: no-repeat;
+        background-size: 35px 35px;
+        background-position: center;
+        width: 35px;
+        height: 35px;
+        right: 30px;
+        top: 80px;
+        /* background: #ffffff; */
+        opacity: 1;
+        z-index: 1000;
+    }
+    .menu:target {
+        display: flex;
+        opacity: 1;
+    }
+    .menu-content ul li{
+        list-style: none;
+        color: #000000;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: left;
+        font-family: "Poppins", sans-serif;
+        margin: 0px;
+        padding-left: 0px;
+        margin-bottom: 10px;
+    }
+    .menu-content ul{
+        display: block;
+        margin: 0px;
+        padding: 0px;
+    }
+    .menu-content ul li:hover{
+        border-bottom: 2px solid #000000;
+    }
+    
+}
+
