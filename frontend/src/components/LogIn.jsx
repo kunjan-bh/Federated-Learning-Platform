@@ -20,7 +20,13 @@ const LogIn = () => {
 
       localStorage.setItem("user", JSON.stringify(response.data));
       setTimeout(() => {
-        navigate("/dashboard"); 
+        if (response.data.role === "central") {
+          navigate("/dashboard");
+        } else if (response.data.role === "client") {
+          navigate("/dashboardClient");
+        } else {
+          navigate("/dashboard"); // fallback
+        }
       }, 2000);
 
     } catch (err) {

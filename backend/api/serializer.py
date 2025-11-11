@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import UserProfile, CentralClientAssignment, CentralAuthModel
+from .models import UserProfile, CentralClientAssignment, CentralAuthModel, ClientModel
 
 
 # ---------------------------
@@ -96,3 +96,26 @@ class CentralAuthModelSerializer(serializers.ModelSerializer):
         if model_file and hasattr(model_file, "name"):
             validated_data["model_file"].name = model_file.name
         return super().create(validated_data)
+
+class ClientModelSerializer(serializers.ModelSerializer):
+    client_email = serializers.CharField(source="assignment.client.email", read_only=True)
+    iteration_name = serializers.CharField(source="assignment.iteration_name", read_only=True)
+    model_name = serializers.CharField(source="assignment.model_name", read_only=True)
+
+    class Meta:
+        model = ClientModel
+        fields = [
+            "id",
+            "assignment",
+            "client_email",
+            "iteration_name",
+            "model_name",
+            "model_file",
+            "accuracy",
+            "precision",
+            "recall",
+            "f1_score",
+            "version",
+            "created_at"
+        ]
+        read_only_fields = ["id", "client_email", "iteration_name", "model_name", "created_at"]

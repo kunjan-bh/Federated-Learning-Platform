@@ -11,6 +11,7 @@ from .serializer import (
     UserProfileSerializers,
     CentralClientAssignmentSerializer,
     CentralAuthModelSerializer,
+    ClientModelSerializer,
 )
 
 
@@ -287,3 +288,125 @@ def iteration_clients(request, iteration_id):
         for a in assignments
     ]
     return Response(data)
+
+@api_view(["GET"])
+def client_dashboard_data(request, email):
+    """
+    Returns summarized analytics for a given client.
+    Includes:
+      - Current running iteration
+      - Total rounds participated (completed + current)
+      - Total finalized models involved
+    """
+    try:
+        client = UserProfile.objects.get(email=email, role="client")
+    except UserProfile.DoesNotExist:
+        return Response({"error": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Find all assignments for this client
+    assignments = CentralClientAssignment.objects.filter(client=client)
+
+    # Count how many iterations the client has participated in
+    total_rounds = assignments.count()
+
+    # Determine which iteration is currently running
+    running_iterations = CentralAuthModel.objects.filter(
+        iteration_name__in=assignments.values_list("iteration_name", flat=True),
+        version__gt=0  # version > 0 means running
+    )
+
+    current_running_rounds = running_iterations.count()
+
+    # Count finalized models (version == 0 means finalized)
+    finalized_models = CentralAuthModel.objects.filter(
+        iteration_name__in=assignments.values_list("iteration_name", flat=True),
+        version=0
+    ).count()
+
+    return Response({
+        "client_email": client.email,
+        "hospital": client.hospital,
+        "total_rounds": total_rounds,
+        "current_running_rounds": current_running_rounds,
+        "total_finalized_models": finalized_models
+    }, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+def list_client_models(request):
+    """
+    Returns all iterations (both current & completed)
+    related to the client's assigned central auth.
+    Includes current (version > 0) and finished (version = 0) models.
+    """
+    user_id = request.GET.get("user_id")
+    if not user_id:
+        return Response({"error": "user_id parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        client = UserProfile.objects.get(id=user_id, role="client")
+    except UserProfile.DoesNotExist:
+        return Response({"error": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Find all iterations linked via assignments
+    assigned_iterations = CentralClientAssignment.objects.filter(client=client)
+    iteration_names = assigned_iterations.values_list("iteration_name", flat=True)
+
+    # Fetch corresponding CentralAuthModel iterations
+    iterations = CentralAuthModel.objects.filter(iteration_name__in=iteration_names).order_by("-created_at")
+
+    serializer = CentralAuthModelSerializer(iterations, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+def current_client_iterations(request, email):
+    """
+    Fetch only the current (running) iterations assigned to a specific client.
+    """
+    try:
+        client = UserProfile.objects.get(email=email, role="client")
+    except UserProfile.DoesNotExist:
+        return Response({"error": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Get current running central models (version > 0)
+    current_iterations = CentralAuthModel.objects.filter(version__gt=0)
+
+    # Filter by assignments for this client
+    assigned_iterations = CentralClientAssignment.objects.filter(
+        client=client, iteration_name__in=current_iterations.values_list("iteration_name", flat=True)
+    )
+
+    data = [
+        {
+            "assignment_id": a.id,
+            "iteration_name": a.iteration_name,
+            "model_name": a.model_name,
+            "data_domain": a.data_domain,
+            "central_auth_email": a.central_auth.email,
+            "version": getattr(a.central_auth.centralauthmodel_set.filter(iteration_name=a.iteration_name, version__gt=0).first(), 'version', 0)
+        }
+        for a in assigned_iterations
+    ]
+    return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
+def submit_client_model(request):
+    """
+    Client uploads their trained model and metrics for an assigned iteration.
+    Expected fields:
+    {
+        "assignment": <assignment_id>,
+        "model_file": <uploaded_file>,
+        "accuracy": 0.92,
+        "precision": 0.89,
+        "recall": 0.91,
+        "f1_score": 0.90,
+        "version": 1
+    }
+    """
+    serializer = ClientModelSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Client model submitted successfully!"}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

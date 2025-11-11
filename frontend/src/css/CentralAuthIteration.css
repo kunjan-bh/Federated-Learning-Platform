@@ -12,7 +12,7 @@
     top: 0;
     left: 0;
     width: 80px; /* collapsed */
-    height: 45vh;
+    height: 40vh;
     background-color: #ffffff; /* match dashboard dark sidebar */
     display: flex;
     flex-direction: column;
@@ -25,7 +25,7 @@
   
   .sidebar:hover {
     width: 250px;
-    height: 55vh;
+    height: 50vh;
   }
   
   .main-container {

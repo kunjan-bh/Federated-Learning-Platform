@@ -15,6 +15,9 @@ import '../src/css/Dashboard.css'
 import '../src/css/FetchClients.css'
 import '../src/css/CentralAuthIteration.css'
 import '../src/css/CentralViewModel.css'
+import '../src/css/DashboardClient.css'
+import '../src/css/ClientIterations.css'
+import '../src/css/SendUpdate.css'
 
 import { BrowserRouter } from 'react-router-dom'
 import "@fontsource/poppins"; 

@@ -13,6 +13,9 @@ import WhyChooseUs from './components/WhyChooseUs';
 import Dashboard from './components/Dashboard';
 import CentralAuthIteration from './components/CentralAuthIteration';
 import CentralViewModel from './components/CentralViewModel';
+import DashboardClient from './components/DashboardClient';
+import ClientIterations from './components/ClientIterations';
+import SendUpdate from './components/SendUpdate';
 
 const App = () => {
   return (
@@ -69,6 +72,21 @@ const App = () => {
         <Route path="/centralAuthModels" element={
             
               <CentralViewModel />
+          }
+        />
+        <Route path="/dashboardClient" element={
+            
+              <DashboardClient />
+          }
+        />
+        <Route path="/clientIterations" element={
+            
+              <ClientIterations />
+          }
+        />
+        <Route path="/sendUpdates" element={
+            
+              <SendUpdate />
           }
         />
       </Routes>

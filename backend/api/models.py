@@ -48,8 +48,7 @@ class CentralClientAssignment(models.Model):
     iteration_name = models.CharField(max_length=255)
     assigned_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('client',)  
+    
 
     def __str__(self):
         return f"{self.client.email} -> {self.central_auth.email} ({self.model_name})"
@@ -69,7 +68,7 @@ class ClientModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.assignment.client.email} - {self.assignment.central_model.model_name} v{self.version}"
+        return f"{self.assignment.client.email} - {self.assignment.model_name} v{self.version}"
 
 
 # Admin registration

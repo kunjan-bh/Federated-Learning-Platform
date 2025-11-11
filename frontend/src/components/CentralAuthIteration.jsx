@@ -39,7 +39,6 @@ const CentralAuthIteration = () => {
     { name: "Dashboard", icon: <FaChartLine />, path: "/dashboard" },
     { name: "Models", icon: <FaDatabase />, path: "/centralAuthModels" },
     { name: "Current Iteration", icon: <FaSyncAlt />, path: "/centralAuthIteration" },
-    { name: "Settings", icon: <FaCogs />, path: "/settings" },
   ];
 
   useEffect(() => {
