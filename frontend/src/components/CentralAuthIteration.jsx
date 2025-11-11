@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaChartLine, FaDatabase, FaSyncAlt, FaCogs, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaChartLine,
+  FaDatabase,
+  FaSyncAlt,
+  FaCogs,
+  FaSignOutAlt,
+  FaDownload,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const CentralAuthIteration = () => {
@@ -10,13 +17,17 @@ const CentralAuthIteration = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [iterationName, setIterationName] = useState(""); // Added iterationName
   const [modelName, setModelName] = useState("");
   const [datasetDomain, setDatasetDomain] = useState("");
   const [version, setVersion] = useState(1);
   const [modelFile, setModelFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [editForm, setEditForm] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   const navigate = useNavigate();
+  const backendBase = "http://127.0.0.1:8000"; // change for production
 
   const navItems = [
     { name: "Dashboard", icon: <FaChartLine />, path: "/dashboard" },
@@ -35,14 +46,12 @@ const CentralAuthIteration = () => {
     try {
       const storedUser = localStorage.getItem("user");
       if (!storedUser) throw new Error("User not found in localStorage");
-  
+
       const user = JSON.parse(storedUser);
-  
-      // Pass user_id as query param
-      const { data } = await axios.get("http://127.0.0.1:8000/central-models/", {
-        params: { user_id: user.id }
+      const { data } = await axios.get(`${backendBase}/central-models/`, {
+        params: { user_id: user.id },
       });
-  
+
       setModels(data);
     } catch (err) {
       console.error(err);
@@ -52,49 +61,83 @@ const CentralAuthIteration = () => {
       setLoading(false);
     }
   };
-  
-
-  const runningIterations = models.filter(m => m.version && m.version > 0).sort((a, b) => b.version - a.version);
-  const finalModel = models.find(m => Number(m.version) === 0);
 
   const handleFileChange = (e) => setModelFile(e.target.files[0]);
 
   const resetForm = () => {
+    setIterationName("");
     setModelName("");
     setDatasetDomain("");
     setVersion(1);
     setModelFile(null);
     setShowForm(false);
+    setEditForm(false);
+    setEditId(null);
+  };
+
+  const openEditForm = (iteration) => {
+    setEditForm(true);
+    setShowForm(false);
+    setIterationName(iteration.iteration_name || ""); // pre-fill iteration name
+    setModelName(iteration.model_name || "");
+    setDatasetDomain(iteration.dataset_domain || "");
+    setVersion(Number(iteration.version) || 1);
+    setModelFile(null);
+    setEditId(iteration.id);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!modelName || !datasetDomain || !modelFile) {
-      toast.warning("Please fill all fields and upload a model file (.pkl)");
+
+    if (!iterationName || !modelName || !datasetDomain || (!modelFile && !editForm)) {
+      toast.warning(
+        "Please fill iteration name, model name and dataset domain. If creating, upload a model file."
+      );
       return;
     }
+
     setSubmitting(true);
-    const user = JSON.parse(localStorage.getItem("user"))
+    const user = JSON.parse(localStorage.getItem("user"));
     const formData = new FormData();
-    formData.append("central_auth", user.id); // Add this
+    formData.append("central_auth", user.id);
+    formData.append("iteration_name", iterationName); // include iteration name
     formData.append("model_name", modelName);
     formData.append("dataset_domain", datasetDomain);
     formData.append("version", version);
-    formData.append("model_file", modelFile);
+
+    if (modelFile) formData.append("model_file", modelFile);
 
     try {
-      await axios.post("http://127.0.0.1:8000/central-models/start/", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      if (editForm && editId) {
+        await axios.patch(`${backendBase}/central-models/${editId}/`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success(
+          version === 0
+            ? "Iteration marked as final (version 0)."
+            : "Iteration updated successfully!"
+        );
+      } else {
+        await axios.post(`${backendBase}/central-models/start/`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Iteration started successfully!");
+      }
+
       await fetchModels();
       resetForm();
-      toast.success("Iteration started successfully!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to start iteration. Check console for details.");
+      toast.error("Failed to submit. Check console for details.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDownload = (filePath) => {
+    if (!filePath) return;
+    const url = filePath.startsWith("http") ? filePath : `${backendBase}${filePath}`;
+    window.open(url, "_blank");
   };
 
   const handleLogout = () => {
@@ -102,9 +145,17 @@ const CentralAuthIteration = () => {
     navigate("/login");
   };
 
+  const runningIterations = models
+    .filter((m) => Number(m.version) > 0)
+    .sort((a, b) => b.version - a.version);
+
+  const finalIterations = models
+    .filter((m) => Number(m.version) === 0)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
   return (
     <div className="page-layout">
-      {/* --- Sidebar Inline --- */}
+      {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo-container">
@@ -130,25 +181,42 @@ const CentralAuthIteration = () => {
         </div>
       </aside>
 
-      {/* --- Main Content --- */}
+      {/* Main */}
       <main className="main-container">
         <ToastContainer position="top-right" autoClose={3000} />
+
         <header className="page-header">
           <h1>Central Auth — Iterations</h1>
-          <p className="muted">Manage current and previous federated-learning iterations</p>
+          <p className="muted">
+            Manage current and previous federated-learning iterations
+          </p>
         </header>
 
+        {/* Summary Row */}
         <section className="summary-row">
           <div className="card1 small">
             <h3>Final model (version 0)</h3>
-            {finalModel ? (
+            {finalIterations.length > 0 ? (
               <div>
-                <strong>{finalModel.model_name}</strong>
-                <div className="muted">Domain: {finalModel.dataset_domain || "—"}</div>
-                <div className="muted">Uploaded: {new Date(finalModel.created_at).toLocaleString()}</div>
-                <div className="muted">By: {finalModel.central_auth_email}</div>
+                <strong>{finalIterations[0].iteration_name}</strong>
+                <div className="muted">Model: {finalIterations[0].model_name}</div>
+                <div className="muted">Domain: {finalIterations[0].dataset_domain}</div>
+                <div className="muted">
+                  Uploaded: {new Date(finalIterations[0].created_at).toLocaleString()}
+                </div>
+                <div className="muted">By: {finalIterations[0].central_auth_email}</div>
+                {finalIterations[0].model_file && (
+                  <button
+                    className="iteration-download-btn"
+                    onClick={() => handleDownload(finalIterations[0].model_file)}
+                  >
+                    <FaDownload /> Download Model
+                  </button>
+                )}
               </div>
-            ) : <div className="muted">No final model yet</div>}
+            ) : (
+              <div className="muted">No final model yet</div>
+            )}
           </div>
 
           <div className="card1 small">
@@ -156,7 +224,10 @@ const CentralAuthIteration = () => {
             <div className="muted">{runningIterations.length} active</div>
             {runningIterations[0] ? (
               <div>
-                <strong>{runningIterations[0].model_name} (v{runningIterations[0].version})</strong>
+                <strong>
+                  {runningIterations[0].iteration_name} ({runningIterations[0].model_name} v
+                  {runningIterations[0].version})
+                </strong>
                 <div className="muted">Domain: {runningIterations[0].dataset_domain}</div>
               </div>
             ) : (
@@ -167,7 +238,7 @@ const CentralAuthIteration = () => {
           <div className="card1 small">
             <h3>Actions</h3>
             <div>
-              <button className="btn" onClick={() => setShowForm(s => !s)}>
+              <button className="btn" onClick={() => setShowForm((s) => !s)}>
                 {showForm ? "Close start form" : "Start new iteration"}
               </button>
               <button className="btn ghost" onClick={fetchModels} style={{ marginLeft: 8 }}>
@@ -177,15 +248,25 @@ const CentralAuthIteration = () => {
           </div>
         </section>
 
-        {showForm && (
+        {/* Create / Edit Form */}
+        {(showForm || editForm) && (
           <section className="card1 form-card1">
-            <h2>Start new iteration</h2>
+            <h2>{editForm ? "Update iteration" : "Start new iteration"}</h2>
             <form onSubmit={handleSubmit}>
+              <div className="form-row">
+                <label>Iteration Name</label>
+                <input
+                  value={iterationName}
+                  onChange={(e) => setIterationName(e.target.value)}
+                  placeholder="e.g. Iteration_01"
+                />
+                <small className="muted">Must be unique for each iteration</small>
+              </div>
               <div className="form-row">
                 <label>Model Name</label>
                 <input
                   value={modelName}
-                  onChange={e => setModelName(e.target.value)}
+                  onChange={(e) => setModelName(e.target.value)}
                   placeholder="e.g. ResNet50_federated"
                 />
               </div>
@@ -193,22 +274,21 @@ const CentralAuthIteration = () => {
                 <label>Dataset Domain</label>
                 <input
                   value={datasetDomain}
-                  onChange={e => setDatasetDomain(e.target.value)}
+                  onChange={(e) => setDatasetDomain(e.target.value)}
                   placeholder="e.g. chest-xray, ehr"
                 />
               </div>
               <div className="form-row">
                 <label htmlFor="version">Version (integer)</label>
                 <input
-                    type="number"
-                    id="version"
-                    value={version}
-                    onChange={e => setVersion(Number(e.target.value))}
-                    min={1}         // optional: minimum version
-                    step={1}        // ensures only integers
-                    placeholder="Enter version number"
-                    className="version-input"
+                  type="number"
+                  id="version"
+                  value={version}
+                  onChange={(e) => setVersion(Number(e.target.value))}
+                  min={0}
+                  step={1}
                 />
+                <small className="muted">Set version 0 to mark this iteration as final.</small>
               </div>
               <div className="form-row">
                 <label>Model file (.pkl)</label>
@@ -217,9 +297,14 @@ const CentralAuthIteration = () => {
               </div>
               <div className="form-actions">
                 <button type="submit" className="btn primary" disabled={submitting}>
-                  {submitting ? "Submitting…" : "Start Iteration"}
+                  {submitting ? "Submitting…" : editForm ? "Update" : "Start Iteration"}
                 </button>
-                <button type="button" className="btn ghost" onClick={resetForm} disabled={submitting}>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  onClick={resetForm}
+                  disabled={submitting}
+                >
                   Cancel
                 </button>
               </div>
@@ -227,53 +312,87 @@ const CentralAuthIteration = () => {
           </section>
         )}
 
+        {/* Current Iterations */}
         <section className="card1 list-card1">
           <h2>Current Iterations</h2>
-          {loading ? <div>Loading...</div> :
-           error ? <div className="error">{error}</div> :
-           runningIterations.length === 0 ? (
+          {loading ? (
+            <div>Loading...</div>
+          ) : error ? (
+            <div className="error">{error}</div>
+          ) : runningIterations.length === 0 ? (
             <div className="empty">
               No active iterations right now. Would you like to start one?
               <div style={{ marginTop: 8 }}>
-                <button className="btn" onClick={() => setShowForm(true)}>Yes, start one</button>
+                <button className="btn" onClick={() => setShowForm(true)}>
+                  Yes, start one
+                </button>
               </div>
             </div>
-           ) : (
+          ) : (
             <ul className="iteration-list">
-              {runningIterations.map(m => (
+              {runningIterations.map((m) => (
                 <li key={m.id} className="iteration-item">
                   <div className="iteration-left">
-                    <strong>{m.model_name}</strong>
-                    <div className="muted">v{m.version} • {m.dataset_domain || "—"}</div>
+                    <strong>{m.iteration_name}</strong>
+                    <div className="muted">
+                      {m.model_name} (v{m.version}) • {m.dataset_domain || "—"}
+                    </div>
                   </div>
                   <div className="iteration-right">
                     <div className="muted small">By: {m.central_auth_email}</div>
-                    <div className="muted small">Uploaded: {new Date(m.created_at).toLocaleString()}</div>
+                    <div className="muted small">
+                      Uploaded: {new Date(m.created_at).toLocaleString()}
+                    </div>
+                    {m.model_file && (
+                      <button
+                        className="iteration-download-btn"
+                        onClick={() => handleDownload(m.model_file)}
+                      >
+                        <FaDownload /> Download
+                      </button>
+                    )}
+                    <button className="iteration-edit-btn" onClick={() => openEditForm(m)}>
+                      Update
+                    </button>
                   </div>
                 </li>
               ))}
             </ul>
-           )
-          }
+          )}
         </section>
 
+        {/* Final / Previous Iterations */}
         <section className="card1 list-card1">
           <h2>Previous / Final Iterations</h2>
-          {loading ? <div>Loading...</div> :
-            models.length === 0 ? <div className="muted">No iterations recorded yet.</div> :
+          {loading ? (
+            <div>Loading...</div>
+          ) : finalIterations.length === 0 ? (
+            <div className="muted">No final or completed iterations yet.</div>
+          ) : (
             <ul className="iteration-list simple">
-              {models.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-                .map(m => (
-                  <li key={m.id} className="iteration-item small">
-                    <div>
-                      <strong>{m.model_name}</strong>
-                      <div className="muted small">v{m.version} • {m.dataset_domain || "—"}</div>
+              {finalIterations.map((m) => (
+                <li key={m.id} className="iteration-item small">
+                  <div>
+                    <strong>{m.iteration_name}</strong>
+                    <div className="muted small">
+                      {m.model_name} (v{m.version}) • {m.dataset_domain || "—"}
                     </div>
-                    <div className="muted small">By: {m.central_auth_email} — {new Date(m.created_at).toLocaleString()}</div>
-                  </li>
+                  </div>
+                  <div className="muted small">
+                    By: {m.central_auth_email} — {new Date(m.created_at).toLocaleString()}
+                  </div>
+                  {m.model_file && (
+                    <button
+                      className="iteration-download-btn"
+                      onClick={() => handleDownload(m.model_file)}
+                    >
+                      <FaDownload /> Download
+                    </button>
+                  )}
+                </li>
               ))}
             </ul>
-          }
+          )}
         </section>
       </main>
     </div>

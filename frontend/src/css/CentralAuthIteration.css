@@ -274,7 +274,19 @@
     padding: 0;
     margin: 0;
   }
-  
+  .iteration-edit-btn{
+    margin-top: 5px;
+    padding: 10px;
+    background-color: #69bee3;
+    /* border: #000000 1px solid; */
+    border: none;
+    color: #000000;
+    border-radius: 10px;
+  }
+  .iteration-edit-btn:hover{
+    margin-bottom: #69bee3;
+    background-color: #e5e7eb;
+  }
   .iteration-item {
     display: flex;
     justify-content: space-between;

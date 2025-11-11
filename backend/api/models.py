@@ -18,6 +18,7 @@ class UserProfile(models.Model):
 
 class CentralAuthModel(models.Model):
     central_auth = models.ForeignKey(UserProfile, on_delete=models.CASCADE, limit_choices_to={'role': 'central'})
+    iteration_name = models.CharField(max_length=255)
     model_name = models.CharField(max_length=255)
     dataset_domain = models.CharField(max_length=255, blank=True, null=True)
     model_file = models.FileField(upload_to='central_models/')
@@ -44,6 +45,7 @@ class CentralClientAssignment(models.Model):
     )
     data_domain = models.CharField(max_length=255)  
     model_name = models.CharField(max_length=255)   
+    iteration_name = models.CharField(max_length=255)
     assigned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
