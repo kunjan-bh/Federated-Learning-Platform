@@ -12,6 +12,7 @@ import LogIn from './components/LogIn';
 import WhyChooseUs from './components/WhyChooseUs';
 import Dashboard from './components/Dashboard';
 import CentralAuthIteration from './components/CentralAuthIteration';
+import CentralViewModel from './components/CentralViewModel';
 
 const App = () => {
   return (
@@ -63,6 +64,11 @@ const App = () => {
         <Route path="/centralAuthIteration" element={
             
               <CentralAuthIteration />
+          }
+        />
+        <Route path="/centralAuthModels" element={
+            
+              <CentralViewModel />
           }
         />
       </Routes>

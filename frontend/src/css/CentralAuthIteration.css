@@ -326,3 +326,161 @@
     }
   }
   
+  /* --- Premium UI Enhancements --- */
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal box */
+.modal {
+  background: #ffffff;
+  padding: 24px 28px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  width: 600px;
+  max-width: 95%;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.modal p.muted {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+/* Client Table */
+.client-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.95rem;
+}
+
+.client-table th,
+.client-table td {
+  padding: 12px 10px;
+  text-align: left;
+}
+
+.client-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #111827;
+}
+
+.client-table td {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.client-table tr:hover td {
+  background: #f9fafb;
+}
+
+/* Buttons */
+.btn,
+.iteration-download-btn,
+.iteration-view-btn,
+.iteration-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Primary buttons */
+.btn.primary,
+.iteration-edit-btn {
+  background: linear-gradient(90deg, #0ea5a4, #0c8f8d);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 10px rgba(14, 165, 164, 0.3);
+}
+
+.btn.primary:hover,
+.iteration-edit-btn:hover {
+  background: linear-gradient(90deg, #0c8f8d, #0ea5a4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(14, 165, 164, 0.4);
+}
+
+/* Ghost buttons */
+.btn.ghost {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #111827;
+}
+
+.btn.ghost:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Download / View buttons */
+.iteration-download-btn,
+.iteration-view-btn {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  margin-right: 8px;
+}
+
+.iteration-download-btn:hover,
+.iteration-view-btn:hover {
+  background: #0ea5a4;
+  border-color: #0ea5a4;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(14, 165, 164, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Close button for modal */
+.modal .btn.ghost {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.modal .btn.ghost:hover {
+  background: #0ea5a4;
+  color: #ffffff;
+  border-color: #0ea5a4;
+  box-shadow: 0 3px 10px rgba(14, 165, 164, 0.3);
+}
+
+/* Hover animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

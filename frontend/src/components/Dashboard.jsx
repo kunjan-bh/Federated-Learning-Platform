@@ -7,25 +7,42 @@ import {
   FaSyncAlt,
   FaSignOutAlt,
 } from "react-icons/fa";
+import axios from "axios";
 import FetchClients from "./FetchClients";
-
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [models, setModels] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  
+  const backendBase = "http://127.0.0.1:8000";
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    console.log(storedUser)
     if (!storedUser) {
       navigate("/login"); 
     } else {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      if (parsedUser.role === "central") fetchModels(parsedUser.id);
     }
   }, [navigate]);
 
-  
+  const fetchModels = async (centralAuthId) => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${backendBase}/central-models/`, {
+        params: { user_id: centralAuthId },
+      });
+      setModels(data);
+    } catch (err) {
+      console.error("Failed to fetch models", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login");
@@ -33,14 +50,17 @@ const Dashboard = () => {
 
   const navItems = [
     { name: "Dashboard", icon: <FaChartLine />, path: "/dashboard" },
-    { name: "Models", icon: <FaDatabase />, path: "/models" },
+    { name: "Models", icon: <FaDatabase />, path: "/centralAuthModels" },
     { name: "Current Iteration", icon: <FaSyncAlt />, path: "/centralAuthIteration" },
     { name: "Settings", icon: <FaCogs />, path: "/settings" },
   ];
-  
 
   if (!user) return null; 
-  console.log(user.hospital)
+
+  // Calculating the dynamic values
+  const currentRunningRounds = models.filter(m => Number(m.version) > 0).length;
+  const totalRounds = models.length; 
+  const totalFinalizedModels = models.filter(m => Number(m.version) === 0).length;
 
   return (
     <div className="dashboard-container1">
@@ -65,7 +85,6 @@ const Dashboard = () => {
           ))}
         </nav>
 
-
         <div className="logout-section">
           <button className="logout-btn" onClick={handleLogout}>
             <FaSignOutAlt className="icon" />
@@ -73,7 +92,6 @@ const Dashboard = () => {
           </button>
         </div>
       </aside>
-
 
       <main className="dashboard-main">
         <div className="dashboard-header">
@@ -92,22 +110,22 @@ const Dashboard = () => {
 
         <div className="cards-container">
           <div className="card">
-            <h3>Current Iteration</h3>
-            <p className="card-value blue">#5</p>
+            <h3>Current Running Rounds</h3>
+            <p className="card-value blue">{loading ? "…" : currentRunningRounds}</p>
           </div>
           <div className="card">
             <h3>Total Rounds</h3>
-            <p className="card-value green">12</p>
+            <p className="card-value green">{loading ? "…" : totalRounds}</p>
           </div>
           <div className="card">
-            <h3>Total Models</h3>
-            <p className="card-value orange">4</p>
+            <h3>Total Finalized Models</h3>
+            <p className="card-value orange">{loading ? "…" : totalFinalizedModels}</p>
           </div>
         </div>
-        {user.role == "central" && (
-            <FetchClients centralAuthId={user.id} email={user.email}/>
-              
-            )}
+
+        {user.role === "central" && (
+          <FetchClients centralAuthId={user.id} email={user.email} />
+        )}
 
         <div className="analytics-section">
           <h3>Analysis Overview</h3>

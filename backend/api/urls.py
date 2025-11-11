@@ -14,4 +14,5 @@ urlpatterns = [
     path('central-models/start/', views.start_iteration, name='start_iteration'),
     path('central-models/running/', views.running_iterations, name='running_iterations'),
     path('central-models/<int:pk>/', views.update_iteration, name='central-models-update'),
+    path("central-models/<int:iteration_id>/clients/", views.iteration_clients),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

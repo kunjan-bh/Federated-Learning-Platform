@@ -25,14 +25,20 @@ const CentralAuthIteration = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editForm, setEditForm] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [showClientsModal, setShowClientsModal] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [selectedIteration, setSelectedIteration] = useState(null);
+
+  
+  
 
   const navigate = useNavigate();
   const backendBase = "http://127.0.0.1:8000"; // change for production
 
   const navItems = [
     { name: "Dashboard", icon: <FaChartLine />, path: "/dashboard" },
-    { name: "Models", icon: <FaDatabase />, path: "/models" },
-    { name: "Current Iteration", icon: <FaSyncAlt />, path: "/iterations" },
+    { name: "Models", icon: <FaDatabase />, path: "/centralAuthModels" },
+    { name: "Current Iteration", icon: <FaSyncAlt />, path: "/centralAuthIteration" },
     { name: "Settings", icon: <FaCogs />, path: "/settings" },
   ];
 
@@ -40,6 +46,19 @@ const CentralAuthIteration = () => {
     fetchModels();
   }, []);
 
+  const fetchIterationClients = async (iterationId) => {
+    try {
+      const { data } = await axios.get(`${backendBase}/central-models/${iterationId}/clients/`);
+      setClients(data);
+      const iteration = models.find((m) => m.id === iterationId);
+      setSelectedIteration(iteration);
+      setShowClientsModal(true);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch assigned clients.");
+    }
+  };
+  
   const fetchModels = async () => {
     setLoading(true);
     setError(null);
@@ -194,7 +213,7 @@ const CentralAuthIteration = () => {
 
         {/* Summary Row */}
         <section className="summary-row">
-          <div className="card1 small">
+          {/* <div className="card1 small">
             <h3>Final model (version 0)</h3>
             {finalIterations.length > 0 ? (
               <div>
@@ -217,7 +236,7 @@ const CentralAuthIteration = () => {
             ) : (
               <div className="muted">No final model yet</div>
             )}
-          </div>
+          </div> */}
 
           <div className="card1 small">
             <h3>Running iterations</h3>
@@ -351,6 +370,9 @@ const CentralAuthIteration = () => {
                         <FaDownload /> Download
                       </button>
                     )}
+                    <button className="iteration-view-btn" onClick={() => fetchIterationClients(m.id)}>
+                      View Clients
+                    </button>
                     <button className="iteration-edit-btn" onClick={() => openEditForm(m)}>
                       Update
                     </button>
@@ -388,12 +410,57 @@ const CentralAuthIteration = () => {
                     >
                       <FaDownload /> Download
                     </button>
+                    
                   )}
+                  <button className="iteration-view-btn" onClick={() => fetchIterationClients(m.id)}>
+                    View Clients
+                  </button>
+
                 </li>
               ))}
             </ul>
           )}
         </section>
+        {showClientsModal && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Assigned Clients</h2>
+              <p className="muted">
+                {selectedIteration?.iteration_name} — {selectedIteration?.model_name}
+              </p>
+
+              {clients.length === 0 ? (
+                <div className="muted">No clients assigned for this iteration.</div>
+              ) : (
+                <table className="client-table">
+                  <thead>
+                    <tr>
+                      <th>Email</th>
+                      <th>Hospital</th>
+                      <th>Data Domain</th>
+                      <th>Assigned At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clients.map((c, i) => (
+                      <tr key={i}>
+                        <td>{c.client_email}</td>
+                        <td>{c.client_hospital || "—"}</td>
+                        <td>{c.data_domain}</td>
+                        <td>{new Date(c.assigned_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              <button className="btn ghost" onClick={() => setShowClientsModal(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

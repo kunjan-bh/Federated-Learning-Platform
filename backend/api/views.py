@@ -265,3 +265,25 @@ def update_iteration(request, pk):
 
     print("Update serializer errors:", serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+def iteration_clients(request, iteration_id):
+    """
+    Returns the list of clients assigned to a specific iteration (by iteration_name).
+    """
+    try:
+        iteration = CentralAuthModel.objects.get(id=iteration_id)
+    except CentralAuthModel.DoesNotExist:
+        return Response({"error": "Iteration not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    assignments = CentralClientAssignment.objects.filter(iteration_name=iteration.iteration_name)
+    data = [
+        {
+            "client_email": a.client.email,
+            "client_hospital": a.client.hospital,
+            "data_domain": a.data_domain,
+            "assigned_at": a.assigned_at,
+        }
+        for a in assignments
+    ]
+    return Response(data)
