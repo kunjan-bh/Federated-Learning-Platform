@@ -107,6 +107,60 @@
   }
 
   
+/* Analytics Section Container */
+.analytics-section {
+  margin-top: 40px;
+  padding: 20px;
+  background-color: #f9f9f9; /* light background to highlight charts */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Chart Titles */
+.analytics-section h4 {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* Individual chart wrapper */
+.analytics-section > div {
+  margin-bottom: 40px; /* space between charts */
+  height: 300px; /* fixed height for charts */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Tooltip and Legend adjustments for better spacing */
+.recharts-legend-wrapper {
+  margin-top: 10px !important;
+}
+
+.recharts-tooltip-wrapper {
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .analytics-section > div {
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-section > div {
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-section > div {
+    height: 180px;
+  }
+}
 
   
   .logout-btn:hover {

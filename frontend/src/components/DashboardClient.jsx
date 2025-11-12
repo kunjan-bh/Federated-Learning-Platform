@@ -9,21 +9,23 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 
+// Recharts
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+
 const DashboardClient = () => {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     current_running_rounds: 0,
     total_rounds: 0,
     total_finalized_models: 0,
+    completed_percentage: 0, // new metric for analysis
+    pending_percentage: 0,   // new metric for analysis
   });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const backendBase = "http://127.0.0.1:8000";
 
-  // ---------------------------
-  // ✅ Load user & fetch stats
-  // ---------------------------
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -41,7 +43,13 @@ const DashboardClient = () => {
     setLoading(true);
     try {
       const { data } = await axios.get(`${backendBase}/client-dashboard-data/${email}/`);
-      setStats(data);
+      // calculate percentages for chart
+      const total = data.total_rounds || 1; // avoid division by zero
+      setStats({
+        ...data,
+        completed_percentage: ((data.total_finalized_models / total) * 100).toFixed(0),
+        pending_percentage: (((data.total_rounds - data.total_finalized_models) / total) * 100).toFixed(0),
+      });
     } catch (err) {
       console.error("Failed to fetch client dashboard data:", err);
     } finally {
@@ -61,6 +69,16 @@ const DashboardClient = () => {
   ];
 
   if (!user) return null;
+
+  // Chart data
+  const pieData1 = [
+    { name: "Completed Models", value: stats.total_finalized_models },
+    { name: "Ongoing Rounds", value: stats.current_running_rounds },
+  ];
+
+
+
+  const COLORS1 = ["#00C49F", "#FF8042"];
 
   return (
     <div className="dashboard-container1">
@@ -124,20 +142,47 @@ const DashboardClient = () => {
             </p>
           </div>
         </div>
-
         <div className="analytics-section">
           <h3>Participation Analysis</h3>
-          <p>
-            Below metrics summarize your activity in the federated network:
-          </p>
+          <p>Below metrics summarize your activity in the federated network:</p>
           <ul className="analysis-list">
             <li>✔️ You are currently involved in {stats.current_running_rounds} ongoing iteration(s).</li>
             <li>📊 You have participated in {stats.total_rounds} total training round(s).</li>
             <li>🏁 You contributed to {stats.total_finalized_models} finalized model(s).</li>
           </ul>
-          <p>
-            Future updates will include performance graphs and model contribution visualizations.
-          </p>
+          <p>Future updates will include performance graphs and model contribution visualizations.</p>
+        </div>
+
+
+        <div className="analytics-section">
+          <h3>Participation Analysis</h3>
+          <div className="charts-wrapper">
+            {/* Chart 1 */}
+            <div className="chart-item">
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={pieData1}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {pieData1.map((entry, index) => (
+                      <Cell key={`cell1-${index}`} fill={COLORS1[index % COLORS1.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+              <p>Completed Models vs Ongoing Rounds</p>
+            </div>
+
+
+          </div>
         </div>
       </main>
     </div>

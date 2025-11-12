@@ -6,6 +6,12 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
+import io
+import pickle
+import numpy as np
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+
 from .models import UserProfile, CentralClientAssignment, CentralAuthModel, ClientModel
 from .serializer import (
     UserProfileSerializers,
@@ -13,6 +19,7 @@ from .serializer import (
     CentralAuthModelSerializer,
     ClientModelSerializer,
 )
+from django.http import HttpResponse
 
 
 # ---------------------------
@@ -103,16 +110,6 @@ def fetch_assign(request, email):
 
 @api_view(["POST"])
 def assign_client(request):
-    """
-    Assign a client to a central user.
-    Expected payload:
-    {
-        "central_auth_id": 1,
-        "client_id": 2,
-        "data_domain": "Healthcare",
-        "model_name": "PredictiveModel"
-    }
-    """
     data = request.data
     central_auth_id = data.get("central_auth_id")
     client_id = data.get("client_id")
@@ -120,27 +117,24 @@ def assign_client(request):
     model_name = data.get("model_name")
     iteration_name = data.get("iteration_name")
 
-    if not all([central_auth_id, client_id, data_domain, model_name]):
-        return Response(
-            {"error": "All fields are required"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    if not all([central_auth_id, client_id, data_domain, model_name, iteration_name]):
+        return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         central_auth = UserProfile.objects.get(id=central_auth_id, role="central")
         client = UserProfile.objects.get(id=client_id, role="client")
     except UserProfile.DoesNotExist:
-        return Response(
-            {"error": "Invalid central_auth_id or client_id"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+        return Response({"error": "Invalid central_auth_id or client_id"}, status=status.HTTP_404_NOT_FOUND)
 
-    if CentralClientAssignment.objects.filter(client=client).exists():
-        return Response(
-            {"error": "This client is already assigned"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+    # Check if client already has a running assignment (version > 0)
+    active_assignments = CentralClientAssignment.objects.filter(
+        client=client,
+        iteration_name__in=CentralAuthModel.objects.filter(version__gt=0).values_list('iteration_name', flat=True)
+    )
+    if active_assignments.exists():
+        return Response({"error": "This client is already assigned to a running iteration"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Create new assignment
     assignment = CentralClientAssignment.objects.create(
         central_auth=central_auth,
         client=client,
@@ -151,6 +145,7 @@ def assign_client(request):
 
     serializer = CentralClientAssignmentSerializer(assignment)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 
 # ---------------------------
@@ -443,3 +438,4 @@ def current_iteration_submissions(request, iteration_id):
             })
 
     return Response(submissions)
+
