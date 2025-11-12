@@ -17,7 +17,7 @@ const CentralAuthIteration = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [iterationName, setIterationName] = useState(""); // Added iterationName
+  const [iterationName, setIterationName] = useState(""); 
   const [modelName, setModelName] = useState("");
   const [datasetDomain, setDatasetDomain] = useState("");
   const [version, setVersion] = useState(1);
@@ -25,15 +25,16 @@ const CentralAuthIteration = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editForm, setEditForm] = useState(false);
   const [editId, setEditId] = useState(null);
+
   const [showClientsModal, setShowClientsModal] = useState(false);
   const [clients, setClients] = useState([]);
   const [selectedIteration, setSelectedIteration] = useState(null);
 
-  
-  
+  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false); // New state
+  const [submissions, setSubmissions] = useState([]); // New state
 
   const navigate = useNavigate();
-  const backendBase = "http://127.0.0.1:8000"; // change for production
+  const backendBase = "http://127.0.0.1:8000"; 
 
   const navItems = [
     { name: "Dashboard", icon: <FaChartLine />, path: "/dashboard" },
@@ -57,7 +58,21 @@ const CentralAuthIteration = () => {
       toast.error("Failed to fetch assigned clients.");
     }
   };
-  
+
+  // New function to fetch submissions
+  const fetchIterationSubmissions = async (iterationId) => {
+    try {
+      const { data } = await axios.get(`${backendBase}/central-models/${iterationId}/submissions/`);
+      setSubmissions(data);
+      const iteration = models.find((m) => m.id === iterationId);
+      setSelectedIteration(iteration);
+      setShowSubmissionsModal(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch client submissions.");
+    }
+  };
+
   const fetchModels = async () => {
     setLoading(true);
     setError(null);
@@ -96,7 +111,7 @@ const CentralAuthIteration = () => {
   const openEditForm = (iteration) => {
     setEditForm(true);
     setShowForm(false);
-    setIterationName(iteration.iteration_name || ""); // pre-fill iteration name
+    setIterationName(iteration.iteration_name || ""); 
     setModelName(iteration.model_name || "");
     setDatasetDomain(iteration.dataset_domain || "");
     setVersion(Number(iteration.version) || 1);
@@ -118,7 +133,7 @@ const CentralAuthIteration = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const formData = new FormData();
     formData.append("central_auth", user.id);
-    formData.append("iteration_name", iterationName); // include iteration name
+    formData.append("iteration_name", iterationName); 
     formData.append("model_name", modelName);
     formData.append("dataset_domain", datasetDomain);
     formData.append("version", version);
@@ -212,31 +227,6 @@ const CentralAuthIteration = () => {
 
         {/* Summary Row */}
         <section className="summary-row">
-          {/* <div className="card1 small">
-            <h3>Final model (version 0)</h3>
-            {finalIterations.length > 0 ? (
-              <div>
-                <strong>{finalIterations[0].iteration_name}</strong>
-                <div className="muted">Model: {finalIterations[0].model_name}</div>
-                <div className="muted">Domain: {finalIterations[0].dataset_domain}</div>
-                <div className="muted">
-                  Uploaded: {new Date(finalIterations[0].created_at).toLocaleString()}
-                </div>
-                <div className="muted">By: {finalIterations[0].central_auth_email}</div>
-                {finalIterations[0].model_file && (
-                  <button
-                    className="iteration-download-btn"
-                    onClick={() => handleDownload(finalIterations[0].model_file)}
-                  >
-                    <FaDownload /> Download Model
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="muted">No final model yet</div>
-            )}
-          </div> */}
-
           <div className="card1 small">
             <h3>Running iterations</h3>
             <div className="muted">{runningIterations.length} active</div>
@@ -369,8 +359,17 @@ const CentralAuthIteration = () => {
                         <FaDownload /> Download
                       </button>
                     )}
-                    <button className="iteration-view-btn" onClick={() => fetchIterationClients(m.id)}>
+                    <button
+                      className="iteration-view-btn"
+                      onClick={() => fetchIterationClients(m.id)}
+                    >
                       View Clients
+                    </button>
+                    <button
+                      className="iteration-view-btn"
+                      onClick={() => fetchIterationSubmissions(m.id)}
+                    >
+                      View Submissions
                     </button>
                     <button className="iteration-edit-btn" onClick={() => openEditForm(m)}>
                       Update
@@ -381,6 +380,69 @@ const CentralAuthIteration = () => {
             </ul>
           )}
         </section>
+
+        {/* Submissions Modal */}
+        {showSubmissionsModal && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Client Submissions</h2>
+              <p className="muted">
+                {selectedIteration?.iteration_name} — {selectedIteration?.model_name}
+              </p>
+
+              {submissions.length === 0 ? (
+                <div className="muted">No submissions yet for this iteration.</div>
+              ) : (
+                <table className="client-table">
+                  <thead>
+                    <tr>
+                      <th>Email</th>
+                      <th>Hospital</th>
+                      <th>Accuracy</th>
+                      <th>Precision</th>
+                      <th>Recall</th>
+                      <th>F1 Score</th>
+                      <th>Version</th>
+                      <th>Model File</th>
+                      <th>Submitted At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {submissions.map((s, i) => (
+                      <tr key={i}>
+                        <td>{s.client_email}</td>
+                        <td>{s.client_hospital || "—"}</td>
+                        <td>{s.accuracy ?? "—"}</td>
+                        <td>{s.precision ?? "—"}</td>
+                        <td>{s.recall ?? "—"}</td>
+                        <td>{s.f1_score ?? "—"}</td>
+                        <td>{s.version}</td>
+                        <td>
+                          {s.model_file ? (
+                            <button
+                              className="btn small"
+                              onClick={() => window.open(s.model_file, "_blank")}
+                            >
+                              Download
+                            </button>
+                          ) : "—"}
+                        </td>
+                        <td>{new Date(s.submitted_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              <button
+                className="btn ghost"
+                onClick={() => setShowSubmissionsModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Final / Previous Iterations */}
         <section className="card1 list-card1">
@@ -409,17 +471,17 @@ const CentralAuthIteration = () => {
                     >
                       <FaDownload /> Download
                     </button>
-                    
                   )}
                   <button className="iteration-view-btn" onClick={() => fetchIterationClients(m.id)}>
                     View Clients
                   </button>
-
                 </li>
               ))}
             </ul>
           )}
         </section>
+
+        {/* Clients Modal */}
         {showClientsModal && (
           <div className="modal-overlay">
             <div className="modal">
@@ -459,7 +521,6 @@ const CentralAuthIteration = () => {
             </div>
           </div>
         )}
-
       </main>
     </div>
   );

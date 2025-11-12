@@ -19,6 +19,11 @@ urlpatterns = [
     path('client-models/', views.list_client_models, name='list_client_models'),
     path("client/current-iterations/<str:email>/", views.current_client_iterations, name="current_client_iterations"),
     path("client/submit-model/", views.submit_client_model, name="submit_client_model"),
+    path(
+    "central-models/<int:iteration_id>/submissions/",
+    views.current_iteration_submissions,
+    name="current_iteration_submissions"
+),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

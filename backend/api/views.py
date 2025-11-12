@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
-from .models import UserProfile, CentralClientAssignment, CentralAuthModel
+from .models import UserProfile, CentralClientAssignment, CentralAuthModel, ClientModel
 from .serializer import (
     UserProfileSerializers,
     CentralClientAssignmentSerializer,
@@ -410,3 +410,36 @@ def submit_client_model(request):
         serializer.save()
         return Response({"message": "Client model submitted successfully!"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+def current_iteration_submissions(request, iteration_id):
+    """
+    Returns latest client submissions for a given current iteration.
+    Only returns the latest version submitted by each client for this iteration.
+    """
+    try:
+        iteration = CentralAuthModel.objects.get(id=iteration_id)
+    except CentralAuthModel.DoesNotExist:
+        return Response({"error": "Iteration not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Get all assignments for this iteration
+    assignments = CentralClientAssignment.objects.filter(iteration_name=iteration.iteration_name)
+
+    submissions = []
+    for assignment in assignments:
+        # Get latest client model for this assignment
+        latest_model = ClientModel.objects.filter(assignment=assignment).order_by('-created_at').first()
+        if latest_model:
+            submissions.append({
+                "client_email": assignment.client.email,
+                "client_hospital": assignment.client.hospital,
+                "accuracy": latest_model.accuracy,
+                "precision": latest_model.precision,
+                "recall": latest_model.recall,
+                "f1_score": latest_model.f1_score,
+                "version": latest_model.version,
+                "model_file": latest_model.model_file.url if latest_model.model_file else None,
+                "submitted_at": latest_model.created_at,
+            })
+
+    return Response(submissions)
